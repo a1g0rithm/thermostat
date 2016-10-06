@@ -7,12 +7,11 @@
 // For now they will just be defined as rectangles.
 
 function ScheduleEntry( hhmm, temp, ss ) {
-  this.ss   = ss;
-  this.hhmm = hhmm;
-  this.temp = temp;
-  this.y    = this.ss.imgY;
-
-  this.x 	= this.xFromHHMM( hhmm ); 
+  this.ss	= ss;
+  this.hhmm	= hhmm;
+  this.temp	= temp;
+  this.y	= this.ss.imgY;
+  this.x	= this.xFromHHMM( hhmm ); 
 }
 
 
@@ -30,6 +29,7 @@ ScheduleEntry.prototype.draw = function( ctx, selected ) {
   }
 
   ctx.textAlign = "center";
+  ctx.fillText( this.hhmm, this.x + this.ss.imgw / 2, this.y - 15 );
   ctx.fillText( this.temp.toFixed( 1 ), this.x + this.ss.imgw / 2, this.y - 2 );
 
 }

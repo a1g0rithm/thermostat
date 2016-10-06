@@ -1,12 +1,12 @@
 {
     "calibration": {
         "boilingMeasured": 99.098043,
-        "elevation": 269,
+        "elevation": 100,
         "freezingMeasured": 0.01
     },
     "logging": {
         "channel": "file",
-        "level": "state"
+        "level": "error"
     },
     "mqtt": {
         "clientID": "thermostat",
@@ -17,7 +17,7 @@
     },
     "pir": {
         "pirCheckInterval": 0.5,
-        "pirEnabled": 1,
+        "pirEnabled": 0,
         "pirIgnoreFrom": "00:00",
         "pirIgnoreTo": "00:00",
         "pirPin": 5
@@ -26,24 +26,25 @@
         "tempScale": "metric"
     },
     "thermostat": {
-        "coolPin": 18,
-        "fanPin": 25,
-        "heatPin": 23,
+        "coolPin": 17,
+        "fanPin": 18,
+        "heatPin": 27,
         "maxTemp": 30.0,
         "minTemp": 15.0,
         "minUIEnabled": 1,
-        "minUITimeout": 60,
-        "tempCheckInterval": 3,
-        "tempHysteresis": 0.5,
-        "tempStep": 0.5
+        "minUITimeout": 30,
+        "tempCheckInterval": 5,
+        "tempHysteresis": 0.2,
+        "tempStep": 0.5,
+	"tempice": 15
     },
     "weather": {
-        "appkey": "your openweathermap.org appkey",
+        "appkey": "",
         "forecastRefreshInterval": 60,
-        "location": "Barrie,ca",
+        "location": "",
         "weatherExceptionInterval": 5,
-        "weatherRefreshInterval": 10,
-		"URLtimeout": 5
+        "weatherRefreshInterval": 60,
+        "URLtimeout": 5
     },
     "web": {
         "host": "discover",

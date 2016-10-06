@@ -1153,18 +1153,14 @@ class AuthController(object):
         """Called on logout"""
     
     def get_loginform(self, username, msg="Login ", from_page="/"):
-        return """<html><body>
-            <form method="post" action="/auth/login">
-            <div style = "width:250px; height:200px; margin: 0 auto; >
-		<div align="center" style="font-family: Helvetica; font-size: 12pt; border: 1px solid black; width : 300pt;" >
-		<input type="hidden" name="from_page" value="%(from_page)s" />
-        	%(msg)s<br />
-		Username: <input type="text" size="20" name="username" value="%(username)s" /><br />
-        	Password: <input type="password" size="20" name="password" /><br />
-        	<input type="submit" value="Log in" />
-		</div>
-	    </div>
-        </body></html>""" % locals()
+        
+	file = open( "web/html/thermostat_login.html", "r" )
+
+	html = file.read()
+
+	file.close()
+		
+	return html %locals()
     
     @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):

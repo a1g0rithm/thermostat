@@ -15,17 +15,17 @@ This project is a fairly comprehensive implementation of a Thermostat for a Rasp
 
 Key features include:
 
-	1. Touch senstive thermostat display/control for the Official Raspberry Pi Foundation 7" Touch Sensitive LCD screen.
-	2. Schedule support, including separate daily schedules for Heat and Cool modes
+	1. Touch senstive thermostat display/control for 5" Touch Sensitive LCD screen.
+	2. Schedule support, including daily schedules for Heat 
 	3. Built in web interface/server to enable control of thermostat and edit schedule remotely through any browser (including touch-sensitive iOS devices)
-	4. Current weather and today/tomorrow weather forecasts using openweathermap.org
+	4. Today/tomorrow weather forecasts using openweathermap.org
 	5. The implementation will run on non-Pi linux machines (eg. Ubuntu) for testing purposes, using simulated GPIO and a fixed current temperature
 	6. Battery backup (optional)
 	7. Supports Celcius (default) or Farenheit
-    8. Supports calibration of your temperature sensor
+	8. Supports calibration of your temperature sensor
 	9. Minimal UI (screensaver) mode
-	10. PIR Motion sensor to switch from minimal to full UI mode (optional)
-	11. Detailed logging with selectable levels, including optional remote logging to a MQTT broker/server
+	10. Detailed logging with selectable levels, including graph of data
+	11. Security Access to web interface
 
 ###Thermostat User Interface
 
@@ -63,16 +63,11 @@ The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the 
 ##Hardware (as used/tested by author):
 
 	- Raspberry Pi 2 Model B
-	- Official Raspberry Pi Foundation 7" Touch Sensitive LCD screen
-	- CanaKit WiFi Adapter 150 Mbps
-	- Prototyping shield/board
-	- Makeatronics 24V AC SSR Board relay board(s) to interface to furnace/AC (from http://makeatronics.blogspot.com/p/store.html, fully assembled)
-	- PowerBoost 1000 Charger (from Adafruit)
-	- Lithium Ion Polymer Battery - 3.7v 2500mAh (from Adafruit)
-	- DS18B20 Weatherproof temperature sensor
-	- Pimoroni Raspberry Pi 7" Touchscreen Display Case (optional, from Adafruit)
-	- Adafruit PIR sensor (optional, https://www.adafruit.com/products/189)
-	- Custom built wooden thermostat enclosure
+	- WiFi Adapter 150 Mbps
+	- SunFounder Lab Modulo 2 Relè 5V
+	- WINOMO DS18B20 Weatherproof temperature sensor
+	- Makibes 5 Inch HDMI Touchscreen Display
+	- Custom 3d abs printed thermostat enclosure
 
 
 ##Software Requirements (as used/tested by author):
@@ -86,7 +81,6 @@ The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the 
 	    - CherryPy (web server)
 	    - schedule (for scheduled events)
 	    - openweathermap.org app key 
-	    - Optional: MQTT client library (paho-mqtt, for remote logging and sensor support) 
 		
 
 ##Software installation:
@@ -104,9 +98,8 @@ The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the 
 The software comes configured to use the following default GPIO pins:
 
 	GPIO 4  - Temperature sensor
-	GPIO 18 - Cool (A/C) relay control
-	GPIO 23 - Heat (Furnace) relay control
-	GPIO 25 - Fan relay control
+	GPIO 27 - Heat (Furnace) relay control
+	GPIO 18 - Fan relay control
 	GPIO 5  - PIR Motion Sensor (optional)
  
 If you wish to use different pins, then change the appropriate values in the thermostat_settings.json file. 
@@ -116,8 +109,6 @@ The author used a Raspberry Pi 2 Model B for his thermostat. Less capable Pi har
 See http://makeatronics.blogspot.com/2013/06/24v-ac-solid-state-relay-board.html for how to wire the thermostat into your heating/cooling system, and 
 https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/hardware for how to wire the temperature sensor into the Pi. 
 
-The author's HVAC system had separate R and Rc hot lines, with the furnace switched to the R and the A/C and fan switched to the Rc lines, and so required two separate
-Makeatronics 24V AC SSR Boards. YMMV.
 
 
 ##Temperature Sensor Calibration:
@@ -181,30 +172,6 @@ Each logging level includes those above it in the list, for example: info level 
 
 Default logging is set to log to a file with level: state.
 
-
-##MQTT Support:
-
-The thermostat code supports logging to a remote MQTT broker/server (if you enable/configure MQTT and also set logging to use mqtt as the channel). This was implemented to allow for tracking of thermostat operation and conditions on a remote server, to enable more detailed analysis/tuning of thermostat/HVAC system performance. For example, log entries could be saved to a mySQL (or other) database, and then analyzed to determine longer term trends, system lag time (eg. how long does it take the HVAC system to bring the temperature up/down to the desired level) to allow for "smart/learning" thermostat capabilities down the road. Rather than complicate the thermostat code with such analysis, and add extra load/software on the thermostat (eg. running a mySQL DBMS on the thermostat Pi), it seemed to make more sense to farm that out to a remote machine instead.
-
-If you want to use remote logging to a MQTT broker/server, do a "sudo pip install paho-mqtt" to install the required client libraries, and configure MQTT settings in thermostat_settings.json to enable MQTT and point to your remote MQTT broker/server instance. The author is running the mosquitto MQTT broker on a separate Raspberry Pi for this purpose.
-
-MQTT topics are structured as follows:  _mqttPubPrefix_/_mqttClientID_/_MSGTYPE_/etc...  
-
-_mqttPubPrefix_ and _mqttClientID_ are set in the thermostat_settings.json file and default to "mymqtt" and "thermostat" respectively. 
-
-_MSGTYPE_ is currently either "log" or "command", for log output or commands directed at the thermostat. The remainder of the topic depends on the context of which is being sent as does the message payload. Read the code for details, or monitor all messages flowing into your MQTT broker/server with a subscription like  "mqttPubPrefix/#" to see what is being generated. Currently the only commands implemented are "restart" and "loglevel" which restart the thermostat code and change the logging level, respectively. Log message topics have the log level as part of the topic, right after the "log" _MSGTYPE_. Message payload is specific to the context. Log messages have a payload that starts with a timestamp, with the actual data following that.
-
-For example, a log message sent by the thermostat might look like this (mqtt topic and payload):
-
-	mymqtt/thermostat/log/state/system/temperature/current    2016-01-09T09:19:27 21.0
-
-A message (mqtt topic and payload) to set the log level to debug, sent to the thermostat, might look like this:
-
-	mymqtt/thermostat/command/loglevel    debug
-
-If you have more than one thermostat/device then their _mqttClientID_s must be unique (for example, the author's actual thermostat has _mqttClientID_="thermostat" and his test environment running on a laptop with _mqttClientID_="laptop"). You might want to consider changing _mqttPubPrefix_ to something unique to your installation, like your surname or local wifi network SSID (The author uses _mqttPubPrefix_="chaeron").
-
-Down the road, functionality will be added to use MQTT to forward remote sensor readings back to the thermostat (eg. multiple, remote battery-powered, wireless temperature/humidity/pressure sensors that can be placed in various rooms in the house).
 
 
 ##Credits
