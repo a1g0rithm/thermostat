@@ -48,7 +48,7 @@ import re
 ##############################################################################
 
 import kivy
-kivy.require( '1.9.2' ) # replace with your current kivy version !
+kivy.require( '1.9.0' ) # replace with your current kivy version !
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -1060,7 +1060,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('termo', 'athos') and password == 'salsaton':
+    if username in ('termo', 'termo1') and password == 'pass':
         return None
     else:
         return u"Incorrect username or password."
