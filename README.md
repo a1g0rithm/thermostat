@@ -31,8 +31,11 @@ Key features include:
 
 **Thermostat UI on Touch Screen:**
 
-![Thermostat - Touch Screen](resources/thermostat_touch.jpg)
+![Thermostat - Touch Screen](resources/thermostat_touch.png)
 
+**Thermostat min UI - Settings:**
+
+![Thermostat - Touch Screen](resources/thermostat_minui.png)
 
 **Thermostat Web UI - Settings:**
 
