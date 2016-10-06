@@ -11,7 +11,7 @@ SOFTWARE.**
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
-This project is a fairly comprehensive implementation of a Thermostat for a Raspberry Pi, designed to run on the new 7" Touch Sensitive LCD screen. 
+This project is a fairly comprehensive implementation of a Thermostat for a Raspberry Pi, designed to run on 5" Touch Sensitive LCD screen. 
 
 Key features include:
 
