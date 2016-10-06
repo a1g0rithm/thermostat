@@ -1,7 +1,7 @@
 # Raspberry Pi Thermostat Implementation
 
-Author: 	Andrzej Taramina
-Email:		andrzej at chaeron dot com
+Author: 	Jpnos
+Email:		jpnos at gmx dot com
 License:	MIT
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -159,7 +159,6 @@ Available logging channels include:
 	none  - no logging
 	file  - log to thermostat.log file (default)
 	print - log to sysout
-	mqtt  - log to a remote MQTT server/broker (mqtt settings must be set up in thermostat_settings.json file)
 
 Logging levels include:
 
@@ -175,6 +174,7 @@ Default logging is set to log to a file with level: state.
 
 
 ##Credits
+Thanks to [Timo Furrer ] (https://github.com/timofurrer) who is the developer of this forked git 
 
 Thanks to [Jeff - The Nooganeer](http://www.nooganeer.com/his/category/projects/homeautomation/raspberry-pi-thermostat/), who's blog posts got me started in the right direction for the hardware needed for this project.
 
@@ -196,10 +196,11 @@ And finally, thanks to [Nich Fugal/Makeatronics](http://makeatronics.blogspot.co
 4. You are welcome to ask questions about the implementation and to offer suggestions to the author. 
 
 
+
 Enjoy!
 
 
-....Andrzej
+....Athos
 
 
 
