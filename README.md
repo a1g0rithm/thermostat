@@ -60,9 +60,9 @@ The author's final internals, before the case top was installed. Green board clo
 
 ![Thermostat Installation](resources/thermostat_installed.jpg)
 
-![Thermostat Installed Min UI](resources/thermostat_min_installed
+![Thermostat Installed Min UI](resources/thermostat_min_installed.jpg)
 
- You can also see the temperature sensor to the right ....it has be be outside the case, since the Pi computer generates enough heat that it would affect the measurement if the temp sensor was inside.
+ You can see the temperature sensor to the right ....it has be be outside the case, since the Pi computer generates enough heat that it would affect the measurement if the temp sensor was inside.
 
 
 ##Hardware (as used/tested by author):
