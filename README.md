@@ -53,8 +53,7 @@ Key features include:
 
 ![Thermostat Hardware - Internals](resources/thermostat_interior.jpg)
 
-The author's final internals, before the case top was installed. Green board closest to the bottom of the photo is the Raspberry Pi 2 computer. Red board is a custom prototyping board that was used to interface the temperature sensor, motion sensor and tie into the relay boards. The two green boards are the relay boards that actually switch the HVAC lines. The small blue board on top is a battery charging controller, with the LiPo battery in gold on the lower right.
-
+The author's final internals, before the case top was installed.
 
 **Thermostat Installation:**
 
@@ -111,8 +110,7 @@ If you wish to use different pins, then change the appropriate values in the the
 
 The author used a Raspberry Pi 2 Model B for his thermostat. Less capable Pi hardware may not provide adequate response times for the touch and web interfaces.
 
-See http://makeatronics.blogspot.com/2013/06/24v-ac-solid-state-relay-board.html for how to wire the thermostat into your heating/cooling system, and 
-https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/hardware for how to wire the temperature sensor into the Pi. 
+
 
 
 
@@ -147,9 +145,13 @@ There is a security access and the user and pass are actualy on the code :
 SESSION_KEY = '_cp_username'
 
 def check_credentials(username, password):
+
     """Verifies credentials for username and password.
+
     Returns None on success or a string describing the error on failure"""
+
     # Adapt to your needs
+
     if username in ('user', 'user1') and password == 'pass':
         return None
 ################################
