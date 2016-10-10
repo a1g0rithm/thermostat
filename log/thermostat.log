@@ -1,0 +1,102 @@
+2016-10-06T13:05:04 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:05:04 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:05:04 state/heatControl/presentation/heatControl: 
+2016-10-06T13:05:04 state/fanControl/presentation/fanControl: 
+2016-10-06T13:05:04 state/holdControl/presentation/holdControl: 
+2016-10-06T13:05:04 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:05:04 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:05:04 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:05:04 state/heat/presentation/heat: 
+2016-10-06T13:05:04 state/fan/presentation/fan: 
+2016-10-06T13:05:04 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:05:04 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:05:04 state/screen/presentation/screen: 
+2016-10-06T13:05:04 state/scheduler/presentation/scheduler: 
+2016-10-06T13:05:04 state/webserver/presentation/webserver: 
+2016-10-06T13:06:45 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:06:45 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:06:45 state/heatControl/presentation/heatControl: 
+2016-10-06T13:06:45 state/fanControl/presentation/fanControl: 
+2016-10-06T13:06:45 state/holdControl/presentation/holdControl: 
+2016-10-06T13:06:45 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:06:45 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:06:45 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:06:45 state/heat/presentation/heat: 
+2016-10-06T13:06:45 state/fan/presentation/fan: 
+2016-10-06T13:06:45 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:06:45 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:06:45 state/screen/presentation/screen: 
+2016-10-06T13:06:45 state/scheduler/presentation/scheduler: 
+2016-10-06T13:06:45 state/webserver/presentation/webserver: 
+2016-10-06T13:07:47 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:07:47 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:07:47 state/heatControl/presentation/heatControl: 
+2016-10-06T13:07:47 state/fanControl/presentation/fanControl: 
+2016-10-06T13:07:47 state/holdControl/presentation/holdControl: 
+2016-10-06T13:07:47 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:07:47 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:07:47 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:07:47 state/heat/presentation/heat: 
+2016-10-06T13:07:47 state/fan/presentation/fan: 
+2016-10-06T13:07:47 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:07:47 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:07:47 state/screen/presentation/screen: 
+2016-10-06T13:07:47 state/scheduler/presentation/scheduler: 
+2016-10-06T13:07:47 state/webserver/presentation/webserver: 
+2016-10-06T13:07:47 state/heatControl/set/binaryStatus: 0
+2016-10-06T13:07:47 state/fanControl/set/binaryStatus: 0
+2016-10-06T13:07:47 state/holdControl/set/binaryStatus: 0
+2016-10-06T13:14:08 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:14:08 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:14:08 state/heatControl/presentation/heatControl: 
+2016-10-06T13:14:08 state/fanControl/presentation/fanControl: 
+2016-10-06T13:14:08 state/holdControl/presentation/holdControl: 
+2016-10-06T13:14:08 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:14:08 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:14:08 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:14:08 state/heat/presentation/heat: 
+2016-10-06T13:14:08 state/fan/presentation/fan: 
+2016-10-06T13:14:08 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:14:08 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:14:08 state/screen/presentation/screen: 
+2016-10-06T13:14:08 state/scheduler/presentation/scheduler: 
+2016-10-06T13:14:08 state/webserver/presentation/webserver: 
+2016-10-06T13:14:08 state/heatControl/set/binaryStatus: 0
+2016-10-06T13:14:08 state/fanControl/set/binaryStatus: 0
+2016-10-06T13:14:08 state/holdControl/set/binaryStatus: 0
+2016-10-06T13:14:51 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:14:51 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:14:51 state/heatControl/presentation/heatControl: 
+2016-10-06T13:14:51 state/fanControl/presentation/fanControl: 
+2016-10-06T13:14:51 state/holdControl/presentation/holdControl: 
+2016-10-06T13:14:51 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:14:51 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:14:51 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:14:51 state/heat/presentation/heat: 
+2016-10-06T13:14:51 state/fan/presentation/fan: 
+2016-10-06T13:14:51 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:14:51 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:14:51 state/screen/presentation/screen: 
+2016-10-06T13:14:51 state/scheduler/presentation/scheduler: 
+2016-10-06T13:14:51 state/webserver/presentation/webserver: 
+2016-10-06T13:14:51 state/heatControl/set/binaryStatus: 0
+2016-10-06T13:14:51 state/fanControl/set/binaryStatus: 0
+2016-10-06T13:14:51 state/holdControl/set/binaryStatus: 0
+2016-10-06T13:15:03 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-06T13:15:03 state/node/presentation/sketchVersion: 2.0.1
+2016-10-06T13:15:03 state/heatControl/presentation/heatControl: 
+2016-10-06T13:15:03 state/fanControl/presentation/fanControl: 
+2016-10-06T13:15:03 state/holdControl/presentation/holdControl: 
+2016-10-06T13:15:03 state/tempSlider/presentation/tempSlider: 
+2016-10-06T13:15:03 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-06T13:15:03 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-06T13:15:03 state/heat/presentation/heat: 
+2016-10-06T13:15:03 state/fan/presentation/fan: 
+2016-10-06T13:15:03 state/motionSensor/presentation/motionSensor: 
+2016-10-06T13:15:03 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-06T13:15:03 state/screen/presentation/screen: 
+2016-10-06T13:15:03 state/scheduler/presentation/scheduler: 
+2016-10-06T13:15:03 state/webserver/presentation/webserver: 
+2016-10-06T13:15:03 state/heatControl/set/binaryStatus: 0
+2016-10-06T13:15:03 state/fanControl/set/binaryStatus: 0
+2016-10-06T13:15:03 state/holdControl/set/binaryStatus: 0
