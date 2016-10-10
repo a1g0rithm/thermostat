@@ -1,5 +1,5 @@
 ### BEGIN LICENSE
-# Copyright (c) 2015 Andrzej Taramina <andrzej@chaeron.com>
+# Copyright (c) 2015 Andrzej Taramina <jpnos@gmx.com>
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -48,7 +48,7 @@ import re
 ##############################################################################
 
 import kivy
-kivy.require( '1.9.0' ) # replace with your current kivy version !
+kivy.require( '1.9.2' ) # replace with your current kivy version !
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -524,6 +524,13 @@ def get_cardinal_direction( heading ):
 	directions = [ "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" ]
 	return directions[ int( round( ( ( heading % 360 ) / 45 ) ) ) ]
 
+def get_precip_amount( raw ):
+	precip = round( raw * precipFactor, precipRound )
+
+	if tempScale == "metric":
+		return str( int ( precip ) )
+	else:
+		return str( precip )
 
 def display_forecast_weather( dt ):
 	with weatherLock:
@@ -1060,7 +1067,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('termo', 'termo1') and password == 'pass':
+    if username in ('user', 'user1') and password == 'pass':
         return None
     else:
         return u"Incorrect username or password."
@@ -1153,18 +1160,14 @@ class AuthController(object):
         """Called on logout"""
     
     def get_loginform(self, username, msg="Login ", from_page="/"):
-        return """<html><body>
-            <form method="post" action="/auth/login">
-            <div style = "width:250px; height:200px; margin: 0 auto; >
-		<div align="center" style="font-family: Helvetica; font-size: 12pt; border: 1px solid black; width : 300pt;" >
-		<input type="hidden" name="from_page" value="%(from_page)s" />
-        	%(msg)s<br />
-		Username: <input type="text" size="20" name="username" value="%(username)s" /><br />
-        	Password: <input type="password" size="20" name="password" /><br />
-        	<input type="submit" value="Log in" />
-		</div>
-	    </div>
-        </body></html>""" % locals()
+        
+	file = open( "web/html/thermostat_login.html", "r" )
+
+	html = file.read()
+
+	file.close()
+		
+	return html %locals()
     
     @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):

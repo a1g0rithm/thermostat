@@ -60,7 +60,9 @@ The author's final internals, before the case top was installed. Green board clo
 
 ![Thermostat Installation](resources/thermostat_installed.jpg)
 
-The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the author's hallway. Motion sensor is on the right side. You can also see the temperature sensor to the right of the motion sensor....it has be be outside the case, since the Pi computer generates enough heat that it would affect the measurement if the temp sensor was inside.
+![Thermostat Installed Min UI](resources/thermostat_min_installed
+
+ You can also see the temperature sensor to the right ....it has be be outside the case, since the Pi computer generates enough heat that it would affect the measurement if the temp sensor was inside.
 
 
 ##Hardware (as used/tested by author):
@@ -77,7 +79,7 @@ The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the 
 
 	- Latest Raspbian OS
 	- Python 2.7
-	- Kivy (Ver 1.9.1 dev) UI framework
+	- Kivy (Ver 1.9.2 dev) UI framework
 	- Additional required python packages:
 	    - w1thermsensor
 	    - FakeGPIO (for testing on non-Pi platforms, customized version included)
@@ -93,7 +95,7 @@ The new Pi thermostat in it's custom wood enclosure. mounted on the wall in the 
 	3. Install additional python packages: CherryPy, schedule & w1thermsensor using the command "sudo pip install ..."
 	4. Get an openweathermap.org app key if you don't have one from here: http://www.openweathermap.org/appid
 	5. Edit the thermostat_settings.json file and insert your Open Weather Map app key in the appropriate spot. Also change the location to your location.
-	6. If you want to use remote logging to a MQTT broker/server, do a "sudo pip install paho-mqtt" to install the required client libraries, and enable/configure MQTT settings in thermostat_settings.json	
+
 
 
 ##Hardware Configuration:
@@ -139,11 +141,21 @@ To access the Web-based interface to control the thermostat and change the sched
 
 
 ##Security/Authentication:
+There is a security access and the user and pass are actualy on the code :
 
-This implementation assumes that your Pi Thermotstat is on a private, access controlled, local wifi network, and is not accessible over the internet. As such, there
-is no security implemented for the web interface. Anyone with access to the wifi network will be able to control your thermostat! If you want/need more stringent
-security/authentication controls for your thermostat, you will have to implement them yourself for now.
+#################################
+SESSION_KEY = '_cp_username'
 
+def check_credentials(username, password):
+    """Verifies credentials for username and password.
+    Returns None on success or a string describing the error on failure"""
+    # Adapt to your needs
+    if username in ('user', 'user1') and password == 'pass':
+        return None
+################################
+So in this case user : user or user1 and password: pass
+
+Change as you like
 
 ##Minimal UI (screensaver) mode: 
 
