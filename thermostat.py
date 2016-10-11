@@ -1,5 +1,5 @@
 ### BEGIN LICENSE
-# Copyright (c) 2015 Andrzej Taramina <jpnos@gmx.com>
+# Copyright (c) 2015 Andrzej Taramina <andrzej@chaeron.com>
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -39,6 +39,8 @@ import json
 import random
 import socket
 import re
+import subprocess
+from shell import shell
 
 
 ##############################################################################
@@ -48,7 +50,7 @@ import re
 ##############################################################################
 
 import kivy
-kivy.require( '1.9.2' ) # replace with your current kivy version !
+kivy.require( '1.9.0' ) # replace with your current kivy version !
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -92,7 +94,7 @@ except ImportError:
 #                                                                            #
 ##############################################################################
 
-from w1thermsensor import W1ThermSensor
+#from w1thermsensor import W1ThermSensor
 
 
 ##############################################################################
@@ -283,7 +285,7 @@ scaleUnits 	  	= "c" if tempScale == "metric" else "f"
 precipUnits		= " mm" if tempScale == "metric" else '"'
 precipFactor		= 1.0 if tempScale == "metric" else 0.0393701
 precipRound		= 0 if tempScale == "metric" else 1
-sensorUnits		= W1ThermSensor.DEGREES_C if tempScale == "metric" else W1ThermSensor.DEGREES_F
+sensorUnits		= "metric" #W1ThermSensor.DEGREES_C if tempScale == "metric" else W1ThermSensor.DEGREES_F
 windFactor		= 3.6 if tempScale == "metric" else 1.0
 windUnits		= " km/h" if tempScale == "metric" else " mph"
 
@@ -346,10 +348,10 @@ log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider/maxTemp", str( maxTemp ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider/tempStep", str( tempStep ), timestamp=False )
 
-try:
-	tempSensor = W1ThermSensor()
-except:
-	tempSensor = None
+#try:
+#	tempSensor = W1ThermSensor()
+#except:
+tempSensor = None
 
 
 # PIR (Motion Sensor) setup:
@@ -520,39 +522,33 @@ def get_weather( url ):
 	return json.loads( urllib2.urlopen( url, None, weatherURLTimeout ).read() )
 
 
+
 def get_cardinal_direction( heading ):
 	directions = [ "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" ]
 	return directions[ int( round( ( ( heading % 360 ) / 45 ) ) ) ]
 
-def get_precip_amount( raw ):
-	precip = round( raw * precipFactor, precipRound )
-
-	if tempScale == "metric":
-		return str( int ( precip ) )
-	else:
-		return str( precip )
 
 def display_forecast_weather( dt ):
 	with weatherLock:
 		interval = forecastRefreshInterval
-
+		print interval
 		try:
 			forecast = get_weather( weatherURLForecast )
 
 			today    = forecast[ "list" ][ 0 ]
 			tomo     = forecast[ "list" ][ 1 ]
-
+			
 			forecastTodayImg.source = "web/images/" + today[ "weather" ][ 0 ][ "icon" ] + ".png" 
-
+			
 			forecastTodaySummaryLabel.text = "[b]" + today[ "weather" ][ 0 ][ "description" ].title() + "[/b]"		
-	
+			
 			todayText = "\n".join( (
 				"Temp Max:    " + str( int( round( today[ "temp" ][ "max" ], 0 ) ) ) + scaleUnits + ", Min: " + str( int( round( today[ "temp" ][ "min" ], 0 ) ) ) + scaleUnits,
 				"Umidita:         "+ str( today[ "humidity" ] ) + "%",
 				"Vento:            " + str( int( round( today[ "speed" ] * windFactor ) ) ) + windUnits + " " + get_cardinal_direction( today[ "deg" ] ),
 				"Nuvole:          " + str( today[ "clouds" ] ) + "%",
 			) )
-
+			print todayText
 			if "rain" in today or "snow" in today:
 				todayText += "\n"
 				if "rain" in today:
@@ -561,13 +557,13 @@ def display_forecast_weather( dt ):
 						todayText += ", Neve: " + get_precip_amount( today[ "snow" ] ) + precipUnits
 				else:
 					todayText += "Neve:         " + get_precip_amount( today[ "snow" ] ) + precipUnits
-
 			forecastTodayDetailsLabel.text = todayText;
 
 			forecastTomoImg.source = "web/images/" + tomo[ "weather" ][ 0 ][ "icon" ] + ".png" 
 
 			forecastTomoSummaryLabel.text = "[b]" + tomo[ "weather" ][ 0 ][ "description" ].title() + "[/b]"		
 	
+			
 			tomoText = "\n".join( (
 				"Temp Max:    " + str( int( round( tomo[ "temp" ][ "max" ], 0 ) ) ) + scaleUnits + ", Min: " + str( int( round( tomo[ "temp" ][ "min" ], 0 ) ) ) + scaleUnits,
 				"Umidita:        " + str( tomo[ "humidity" ] ) + "%",
@@ -602,6 +598,15 @@ def display_forecast_weather( dt ):
 			log( LOG_LEVEL_ERROR, CHILD_DEVICE_WEATHER_FCAST_TODAY, MSG_SUBTYPE_TEXT, "Update FAILED!" )
 
 		Clock.schedule_once( display_forecast_weather, interval )
+		
+		
+def get_precip_amount( raw ):
+	precip = round( raw * precipFactor, precipRound )
+
+	if tempScale == "metric":
+		return str( int ( precip ) )
+	else:
+		return str( precip )
 
 
 ##############################################################################
@@ -803,7 +808,7 @@ def check_pir( pin ):
 				  Clock.unschedule( show_minimal_ui )
 
 			minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout ) 
-
+			
 			ignore = False
 			now = datetime.datetime.now().time()
 			
@@ -823,10 +828,13 @@ def check_pir( pin ):
 
 
 # Minimal UI Display functions and classes
+#shell.shell(has_input=False, record_output=True, record_errors=True, strip_empty=True)
 
 def show_minimal_ui( dt ):
 	with thermostatLock:
 		screenMgr.current = "minimalUI"
+		sh=shell("/home/athos/back_off.sh")
+		sh.run
 		log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Minimal" )
 
 
@@ -1060,6 +1068,8 @@ def reloadSchedule():
 # Form based authentication for CherryPy. Requires the                       #
 # Session tool to be loaded.                                                 #
 ##############################################################################
+cherrypy.server.socket_host = '0.0.0.0'
+
 
 SESSION_KEY = '_cp_username'
 
@@ -1067,7 +1077,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('user', 'user1') and password == 'pass':
+    if username in ('termo', 'athos') and password == 'salsaton':
         return None
     else:
         return u"Incorrect username or password."
@@ -1168,6 +1178,7 @@ class AuthController(object):
 	file.close()
 		
 	return html %locals()
+    
     
     @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):
@@ -1349,7 +1360,7 @@ class WebInterface(object):
 
 def startWebServer():	
 	host = "discover" if not( settings.exists( "web" ) ) else settings.get( "web" )[ "host" ]
-	cherrypy.server.socket_host = host if host != "discover" else get_ip_address()	# use machine IP address if host = "discover"
+	#cherrypy.server.socket_host = host if host != "discover" else get_ip_address()	# use machine IP address if host = "discover"
 	cherrypy.server.socket_port = 80 if not( settings.exists( "web" ) ) else settings.get( "web" )[ "port" ]
 
 	log( LOG_LEVEL_STATE, CHILD_DEVICE_WEBSERVER, MSG_SUBTYPE_TEXT, "Starting on " + cherrypy.server.socket_host + ":" + str( cherrypy.server.socket_port ) )
@@ -1389,7 +1400,8 @@ def startWebServer():
 	cherrypy.config.update(
 		{ 'log.screen': debug,
 		  'log.access_file': "",
-		  'log.error_file': ""
+		  'log.error_file': "",
+		  'server.thread_pool' : 10  
 		}
 	)
 

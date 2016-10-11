@@ -100,3 +100,56 @@
 2016-10-06T13:15:03 state/heatControl/set/binaryStatus: 0
 2016-10-06T13:15:03 state/fanControl/set/binaryStatus: 0
 2016-10-06T13:15:03 state/holdControl/set/binaryStatus: 0
+2016-10-10T11:47:27 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-10T11:47:27 state/node/presentation/sketchVersion: 2.0.1
+2016-10-10T11:47:27 state/heatControl/presentation/heatControl: 
+2016-10-10T11:47:27 state/fanControl/presentation/fanControl: 
+2016-10-10T11:47:27 state/holdControl/presentation/holdControl: 
+2016-10-10T11:47:27 state/tempSlider/presentation/tempSlider: 
+2016-10-10T11:47:27 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-10T11:47:27 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-10T11:47:27 state/heat/presentation/heat: 
+2016-10-10T11:47:27 state/fan/presentation/fan: 
+2016-10-10T11:47:27 state/motionSensor/presentation/motionSensor: 
+2016-10-10T11:47:27 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-10T11:47:27 state/screen/presentation/screen: 
+2016-10-10T11:47:27 state/scheduler/presentation/scheduler: 
+2016-10-10T11:47:27 state/webserver/presentation/webserver: 
+2016-10-10T11:47:27 state/heatControl/set/binaryStatus: 0
+2016-10-10T11:47:27 state/fanControl/set/binaryStatus: 0
+2016-10-10T11:47:27 state/holdControl/set/binaryStatus: 0
+2016-10-10T11:47:46 state/node/presentation/sketchName: Thermostat Starting Up...
+2016-10-10T11:47:46 state/node/presentation/sketchVersion: 2.0.1
+2016-10-10T11:47:46 state/heatControl/presentation/heatControl: 
+2016-10-10T11:47:46 state/fanControl/presentation/fanControl: 
+2016-10-10T11:47:46 state/holdControl/presentation/holdControl: 
+2016-10-10T11:47:46 state/tempSlider/presentation/tempSlider: 
+2016-10-10T11:47:46 state/weatherForecastToday/presentation/weatherForecastToday: 
+2016-10-10T11:47:46 state/weatherForecastTomorrow/presentation/weatherForecastTomorrow: 
+2016-10-10T11:47:46 state/heat/presentation/heat: 
+2016-10-10T11:47:46 state/fan/presentation/fan: 
+2016-10-10T11:47:46 state/motionSensor/presentation/motionSensor: 
+2016-10-10T11:47:46 state/temperatureSensor/presentation/temperatureSensor: 
+2016-10-10T11:47:46 state/screen/presentation/screen: 
+2016-10-10T11:47:46 state/scheduler/presentation/scheduler: 
+2016-10-10T11:47:46 state/webserver/presentation/webserver: 
+2016-10-10T11:47:46 state/heatControl/set/binaryStatus: 0
+2016-10-10T11:47:46 state/fanControl/set/binaryStatus: 0
+2016-10-10T11:47:46 state/holdControl/set/binaryStatus: 0
+2016-10-10T11:47:46 state/webserver/set/text: Starting on 192.168.1.101:8087
+2016-10-10T11:47:48 state/heatControl/set/binaryStatus: 1
+2016-10-10T11:47:48 state/holdControl/set/binaryStatus: 0
+2016-10-10T11:47:49 state/heatControl/set/binaryStatus: 0
+2016-10-10T11:47:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T11:52:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T11:57:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T11:59:34 state/heatControl/set/binaryStatus: 1
+2016-10-10T11:59:34 state/holdControl/set/binaryStatus: 0
+2016-10-10T11:59:36 state/heat/set/binaryStatus: 0
+2016-10-10T11:59:36 state/fan/set/binaryStatus: 0
+2016-10-10T11:59:37 state/heatControl/set/binaryStatus: 0
+2016-10-10T11:59:41 state/heat/set/binaryStatus: 1
+2016-10-10T12:02:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T12:07:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T12:12:56 error/weatherForecastToday/set/text: Update FAILED!
+2016-10-10T12:14:13 state/node/set/custom/shutdown: Thermostat Shutting Down...

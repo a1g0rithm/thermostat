@@ -112,7 +112,13 @@ The author used a Raspberry Pi 2 Model B for his thermostat. Less capable Pi har
 
 
 
-
+##How USE:
+	Heat :	Schedule change temperature as set on file
+		change temp on slider remain on the temperature till a schedule change it
+		
+	Hold :	Temp remains on set temp
+	
+	No Hold No Heat : set temp to Ice Preserve (set Temperature on Json Setting file)
 
 ##Temperature Sensor Calibration:
 
@@ -191,12 +197,9 @@ Default logging is set to log to a file with level: state.
 
 
 ##Credits
-Thanks to [Timo Furrer ] (https://github.com/timofurrer) who is the developer of this forked git 
+Thanks to [chaeron ] (https://github.com/chaeron) who is the developer of this forked git 
 
 Thanks to [Jeff - The Nooganeer](http://www.nooganeer.com/his/category/projects/homeautomation/raspberry-pi-thermostat/), who's blog posts got me started in the right direction for the hardware needed for this project.
-
-Thanks to [Adafruit - Temperature Sensing Tutorial](https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/hardware) for info on how to wire
-a DS18B20 temperature sensor into the Raspberry Pi.
  
 And finally, thanks to [Nich Fugal/Makeatronics](http://makeatronics.blogspot.com/2013/06/24v-ac-solid-state-relay-board.html) for his great 24V AC Solid State Relay Board.
 
