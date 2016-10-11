@@ -1077,7 +1077,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('termo', 'athos') and password == 'salsaton':
+    if username in ('user', 'user1') and password == 'pass':
         return None
     else:
         return u"Incorrect username or password."
