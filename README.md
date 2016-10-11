@@ -39,15 +39,18 @@ Key features include:
 
 **Thermostat Web UI - Settings:**
 
-![Thermostat - Web UI](resources/thermostat_web.jpg)
+![Thermostat - Web UI](resources/thermostat_web.png)
 
 
 **Thermostat Web UI - Edit Schedule:**
 
-![Thermostat Edit Schedule - Web UI](resources/thermostat_schedule.jpg)
+![Thermostat Edit Schedule - Web UI](resources/thermostat_schedule.png)
 
 **Note**: *Double click/tap on a blank space in the schedule to create a new entry*
 
+**Thermostat Graph:**
+
+![Thermostat Edit Schedule - Web UI](resources/thermostat_graph.png)
 
 **Thermostat Hardware - Internals:**
 
