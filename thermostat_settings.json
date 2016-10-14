@@ -26,7 +26,7 @@
         "tempScale": "metric"
     },
     "thermostat": {
-        "coolPin": 17,
+        "lightPin": 24,
         "fanPin": 18,
         "heatPin": 27,
         "maxTemp": 30.0,
@@ -36,18 +36,21 @@
         "tempCheckInterval": 5,
         "tempHysteresis": 0.2,
         "tempStep": 0.5,
-	"tempice": 15
+	"tempice": 15,
+	"lightOff": 40,
+	"user" : "termo",
+	"pass" : "pass"
     },
     "weather": {
-        "appkey": "",
+        "appkey": "9b444a2d4b7a5d2da2c966b37bcef619",
         "forecastRefreshInterval": 60,
-        "location": "",
+        "location": "3175081",
         "weatherExceptionInterval": 5,
         "weatherRefreshInterval": 60,
         "URLtimeout": 5
     },
     "web": {
         "host": "discover",
-        "port": 8087
+        "port": 80
     }
 }

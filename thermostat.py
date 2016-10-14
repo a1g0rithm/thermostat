@@ -1,5 +1,5 @@
 ### BEGIN LICENSE
-# Copyright (c) 2015 Andrzej Taramina <andrzej@chaeron.com>
+# Copyright (c) 2016 Jpnos <jpnos@gmx.com>
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -40,8 +40,8 @@ import random
 import socket
 import re
 import subprocess
-from shell import shell
-
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
 ##############################################################################
 #                                                                            #
@@ -62,7 +62,7 @@ from kivy.uix.slider import Slider
 from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle
 from kivy.storage.jsonstore import JsonStore
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition,FallOutTransition
 
 
 ##############################################################################
@@ -94,7 +94,7 @@ except ImportError:
 #                                                                            #
 ##############################################################################
 
-#from w1thermsensor import W1ThermSensor
+from w1thermsensor import W1ThermSensor
 
 
 ##############################################################################
@@ -140,6 +140,7 @@ CHILD_DEVICE_UICONTROL_HOLD			= "holdControl"
 CHILD_DEVICE_UICONTROL_SLIDER			= "tempSlider"
 CHILD_DEVICE_WEATHER_FCAST_TODAY		= "weatherForecastToday"
 CHILD_DEVICE_WEATHER_FCAST_TOMO			= "weatherForecastTomorrow"
+CHILD_DEVICE_WEATHER_CURR			= "weatherCurrent"
 CHILD_DEVICE_HEAT				= "heat"
 CHILD_DEVICE_FAN				= "fan"
 CHILD_DEVICE_PIR				= "motionSensor"
@@ -154,6 +155,7 @@ CHILD_DEVICES						= [
 	CHILD_DEVICE_UICONTROL_FAN,
 	CHILD_DEVICE_UICONTROL_HOLD,
 	CHILD_DEVICE_UICONTROL_SLIDER,
+	CHILD_DEVICE_WEATHER_CURR,
 	CHILD_DEVICE_WEATHER_FCAST_TODAY,
 	CHILD_DEVICE_WEATHER_FCAST_TOMO,
 	CHILD_DEVICE_HEAT,
@@ -184,7 +186,7 @@ MSG_SUBTYPE_TEXT			= "text"
 #                                                                            #
 ##############################################################################
 
-THERMOSTAT_VERSION = "2.0.1"
+THERMOSTAT_VERSION = "2.0.5"
 
 # Debug settings
 
@@ -285,7 +287,7 @@ scaleUnits 	  	= "c" if tempScale == "metric" else "f"
 precipUnits		= " mm" if tempScale == "metric" else '"'
 precipFactor		= 1.0 if tempScale == "metric" else 0.0393701
 precipRound		= 0 if tempScale == "metric" else 1
-sensorUnits		= "metric" #W1ThermSensor.DEGREES_C if tempScale == "metric" else W1ThermSensor.DEGREES_F
+sensorUnits		= W1ThermSensor.DEGREES_C if tempScale == "metric" else W1ThermSensor.DEGREES_F
 windFactor		= 3.6 if tempScale == "metric" else 1.0
 windUnits		= " km/h" if tempScale == "metric" else " mph"
 
@@ -301,7 +303,9 @@ tempCheckInterval	= 3    if not( settings.exists( "thermostat" ) ) else settings
 
 minUIEnabled		= 0    if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "minUIEnabled" ]
 minUITimeout		= 3    if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "minUITimeout" ]
+lightOff		= 10   if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "lightOff" ]
 minUITimer		= None
+lightOffTimer		= None
 
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/tempScale", str( tempScale ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/scaleUnits", str( scaleUnits ), timestamp=False )
@@ -316,7 +320,7 @@ log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperat
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/tempCheckInterval", str( tempCheckInterval ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/minUIEnabled", str( minUIEnabled ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/minUITimeout", str( minUITimeout ), timestamp=False )
-
+log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/lightOff", str( lightOff ), timestamp=False )
 
 # Temperature calibration settings:
 
@@ -348,10 +352,10 @@ log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider/maxTemp", str( maxTemp ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/UISlider/tempStep", str( tempStep ), timestamp=False )
 
-#try:
-#	tempSensor = W1ThermSensor()
-#except:
-tempSensor = None
+try:
+	tempSensor = W1ThermSensor()
+except:
+	tempSensor = None
 
 
 # PIR (Motion Sensor) setup:
@@ -376,12 +380,15 @@ log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/pir/igno
 
 heatPin 			= 23 if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "heatPin" ]
 fanPin  			= 25 if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "fanPin" ]
+lightPin			= 24 if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "lightPin" ]
 
 GPIO.setmode( GPIO.BCM )
 GPIO.setup( heatPin, GPIO.OUT )
 GPIO.output( heatPin, GPIO.HIGH )
 GPIO.setup( fanPin, GPIO.OUT )
 GPIO.output( fanPin, GPIO.HIGH )
+GPIO.setup( lightPin, GPIO.OUT )
+GPIO.output( lightPin, GPIO.HIGH )
 
 if pirEnabled:
 	GPIO.setup( pirPin, GPIO.IN )
@@ -469,31 +476,30 @@ def get_status_string():
 	
 		return "[b]Sistema:[/b]\n  " + \
 			   "T Imp:    " +str(temperature)+"c \n  "+\
-			   "Heat:      " + ( "[b]On[/b][/color]" if testHeat else "Off" ) + "\n  "+\
+			   "Heat:      " + ( "[b]On[/b]" if testHeat else "Off" ) + "\n  "+\
 			   "Sched:   " + sched
 
 
-versionLabel = Label( text="Thermostat v" + str( THERMOSTAT_VERSION ), size_hint = ( None, None ), font_size='10sp', markup=True, text_size=( 150, 20 ) )
-currentLabel = Label( text="[b]" + str( currentTemp ) + scaleUnits + "[/b]", size_hint = ( None, None ), font_size='100sp', markup=True, text_size=( 300, 200 ) )
-altCurLabel	 = Label( text=currentLabel.text, size_hint = ( None, None ), font_size='100sp', markup=True, text_size=( 300, 200 ), color=( 0.7, 0.7, 0.7, 0.3 ) )
+versionLabel	= Label( text="Thermostat v" + str( THERMOSTAT_VERSION ), size_hint = ( None, None ), font_size='10sp', markup=True, text_size=( 150, 20 ) )
+currentLabel	= Label( text="[b]" + str( currentTemp ) + scaleUnits + "[/b]", size_hint = ( None, None ), font_size='100sp', markup=True, text_size=( 300, 200 ) )
+altCurLabel	= Label( text=currentLabel.text, size_hint = ( None, None ), font_size='100sp', markup=True, text_size=( 300, 200 ), color=( 0.5, 0.5, 0.5, 0.2 ) )
 
 setLabel     = Label( text="  Set\n[b]" + str( setTemp ) + scaleUnits + "[/b]", size_hint = ( None, None ), font_size='25sp', markup=True, text_size=( 100, 100 ) )
 statusLabel  = Label( text=get_status_string(), size_hint = ( None, None ),  font_size='30sp', markup=True, text_size=( 240, 230 ) )
 
-altStatusLabel = Label( text=get_status_string(), size_hint = ( None, None),font_size='30sp', markup=True, text_size=( 240, 230 ),color=(0.7,0.7,0.7,0.3))
+altStatusLabel = Label( text=get_status_string(), size_hint = ( None, None),font_size='30sp', markup=True, text_size=( 240, 230 ),color=(0.5,0.5,0.5,0.2))
 
-dateLabel	= Label( text="[b]" + time.strftime("%d %b %a, %Y") + "[/b]", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 270, 40 ) )
+dateLabel	= Label( text="[b]" + time.strftime("%d %b %a, %Y") + "[/b]", size_hint = ( None, None ), font_size='25sp', markup=True, text_size=( 270, 40 ) )
 
 timeStr		= time.strftime("%H:%M").lower()
 timeInit	= time.time()
 
-timeLabel	 = Label( text="[b]" + ( timeStr if timeStr[0:1] != "0" else timeStr[1:] ) + "[/b]", size_hint = ( None, None ), font_size='40sp', markup=True, text_size=( 180, 75 ) )
-altTimeLabel = Label( text=timeLabel.text, size_hint = ( None, None ), font_size='40sp', markup=True, text_size=( 180, 75 ), color=( 0.7, 0.7, 0.7, 0.3 ) )
+timeLabel	 = Label( text="[b]" + ( timeStr if timeStr[0:1] != "0" else timeStr[1:] ) + "[/b]", size_hint = ( None, None ), font_size='45sp', markup=True, text_size=( 180, 75 ) )
+altTimeLabel = Label( text=timeLabel.text, size_hint = ( None, None ), font_size='40sp', markup=True, text_size=( 180, 75 ), color=( 0.5, 0.5, 0.5, 0.2 ) )
 
 tempSlider 	 = Slider( orientation='vertical', min=minTemp, max=maxTemp, step=tempStep, value=setTemp, size_hint = ( None, None ) )
 
 screenMgr    = None
-
 
 ##############################################################################
 #                                                                            #
@@ -506,9 +512,15 @@ weatherAppKey		 = settings.get( "weather" )[ "appkey" ]
 weatherURLBase  	 = "http://api.openweathermap.org/data/2.5/"
 weatherURLForecast 	 = weatherURLBase + "forecast/daily?units=" + tempScale + "&id=" + weatherLocation + "&APPID=" + weatherAppKey + "&lang=it"
 weatherURLTimeout 	 = settings.get( "weather" )[ "URLtimeout" ]
+weatherURLCurrent 	 = weatherURLBase + "weather?units=" + tempScale + "&id=" + weatherLocation + "&APPID=" + weatherAppKey + "&lang=it"
 
 forecastRefreshInterval  = settings.get( "weather" )[ "forecastRefreshInterval" ] * 60  
 weatherExceptionInterval = settings.get( "weather" )[ "weatherExceptionInterval" ] * 60  
+weatherRefreshInterval   = settings.get( "weather" )[ "weatherRefreshInterval" ] * 60
+
+weatherSummaryLabel  = Label( text="", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 200, 20 ) )
+weatherDetailsLabel  = Label( text="", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 300, 150 ), valign="top" )
+weatherImg           = Image( source="web/images/na.png", size_hint = ( None, None ) )
 
 forecastTodaySummaryLabel = Label( text="", size_hint = ( None, None ), font_size='15sp',  markup=True, text_size=( 100, 15 ) )
 forecastTodayDetailsLabel = Label( text="", size_hint = ( None, None ), font_size='15sp',  markup=True, text_size=( 200, 150 ), valign="top" )
@@ -526,15 +538,42 @@ def get_weather( url ):
 def get_cardinal_direction( heading ):
 	directions = [ "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" ]
 	return directions[ int( round( ( ( heading % 360 ) / 45 ) ) ) ]
+	
+	
+def display_current_weather( dt ):
+	with weatherLock:
+		interval = weatherRefreshInterval
+		try:
+			weather = get_weather( weatherURLCurrent )
+			print weather
+			weatherImg.source = "web/images/" + weather[ "weather" ][ 0 ][ "icon" ] + ".png" 
+			weatherSummaryLabel.text = "[b]" + weather[ "weather" ][ 0 ][ "description" ].title() + "[/b]"
+			weatherDetailsLabel.text = "\n".join( (
+				"Temp:       " + str( int( round( weather[ "main" ][ "temp" ], 0 ) ) ) + scaleUnits,
+				"Umidita:   " + str( weather[ "main" ][ "humidity" ] ) + "%",
+				"Vento:       " + str( int( round( weather[ "wind" ][ "speed" ] * windFactor ) ) ) + windUnits + " " + get_cardinal_direction( weather[ "wind" ][ "deg" ] ),
+				"Nuvole:     " + str( weather[ "clouds" ][ "all" ] ) + "%",
+			) )
 
+			log( LOG_LEVEL_INFO, CHILD_DEVICE_WEATHER_CURR, MSG_SUBTYPE_TEXT, weather[ "weather" ][ 0 ][ "description" ].title() + "; " + re.sub( '\n', "; ", re.sub( ' +', ' ', weatherDetailsLabel.text ).strip() ) )
+
+		except:
+			interval = weatherExceptionInterval
+
+			weatherImg.source = "web/images/na.png"
+			weatherSummaryLabel.text = ""
+			weatherDetailsLabel.text = ""
+
+			log( LOG_LEVEL_ERROR, CHILD_DEVICE_WEATHER_CURR, MSG_SUBTYPE_TEXT, "Update FAILED!" )
+
+		Clock.schedule_once( display_current_weather, interval )
 
 def display_forecast_weather( dt ):
 	with weatherLock:
 		interval = forecastRefreshInterval
-		print interval
 		try:
 			forecast = get_weather( weatherURLForecast )
-
+			print forecast
 			today    = forecast[ "list" ][ 0 ]
 			tomo     = forecast[ "list" ][ 1 ]
 			
@@ -548,7 +587,6 @@ def display_forecast_weather( dt ):
 				"Vento:            " + str( int( round( today[ "speed" ] * windFactor ) ) ) + windUnits + " " + get_cardinal_direction( today[ "deg" ] ),
 				"Nuvole:          " + str( today[ "clouds" ] ) + "%",
 			) )
-			print todayText
 			if "rain" in today or "snow" in today:
 				todayText += "\n"
 				if "rain" in today:
@@ -799,16 +837,17 @@ def update_set_temp( slider, value ):
 
 def check_pir( pin ):
 	global minUITimer
-
+	global lightOffTimer
 	with thermostatLock:
 		if GPIO.input( pirPin ): 
 			log( LOG_LEVEL_INFO, CHILD_DEVICE_PIR, MSG_SUBTYPE_TRIPPED, "1" )
 
 			if minUITimer != None:
 				  Clock.unschedule( show_minimal_ui )
-
+				  if lightOffTimer != None:
+					Clock.unschedule( light_off )	
 			minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout ) 
-			
+			lighOffTimer = Clock.schedule_once( light_off, lightOff )	
 			ignore = False
 			now = datetime.datetime.now().time()
 			
@@ -833,11 +872,14 @@ def check_pir( pin ):
 def show_minimal_ui( dt ):
 	with thermostatLock:
 		screenMgr.current = "minimalUI"
-		sh=shell("/home/athos/back_off.sh")
-		sh.run
 		log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Minimal" )
 
-
+def light_off( dt ):
+	with thermostatLock:
+		print "screen off",lightOff
+		GPIO.output( lightPin, GPIO.HIGH )
+		log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Screen Off" )
+		
 class MinimalScreen( Screen ):
 	def on_touch_down( self, touch ):
 		if self.collide_point( *touch.pos ):
@@ -846,13 +888,18 @@ class MinimalScreen( Screen ):
 
 	def on_touch_up( self, touch ):
 		global minUITimer
-
+		global lightOffTimer
 		if touch.grab_current is self:
 			touch.ungrab( self )
 			with thermostatLock:
+				print minUITimer,lightOffTimer
+				Clock.unschedule( light_off )
 				if minUITimer != None:
-					Clock.unschedule( show_minimal_ui )
+					Clock.unschedule( show_minimal_ui )	
 				minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout )
+				lighOffTimer = Clock.schedule_once( light_off, lightOff )
+				GPIO.output( lightPin, GPIO.LOW )
+				print "screen on"
 				self.manager.current = "thermostatUI"
 				log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Full" )
 			return True
@@ -876,7 +923,10 @@ class ThermostatApp( App ):
 		with thermostatUI.canvas.before:
 			Color ( 0.0, 0.0, 0.0, 1 )
 			self.rect = Rectangle( size=( 800, 480 ), pos=thermostatUI.pos )
-
+			Color (1.0, 0.1,  0.1, 1.0)
+			self.rect =Rectangle (size=(290,250), pos=(280,210))
+			Color (0.0, 0.0,  0.0, 1)
+			self.rect =Rectangle (size=(284,244), pos=(283,213))
 		# Create the rest of the UI objects ( and bind them to callbacks, if necessary ):
 		
 		wimg = Image( source='web/images/logo.png' )
@@ -887,15 +937,15 @@ class ThermostatApp( App ):
 		tempSlider.bind( on_touch_down=update_set_temp, on_touch_move=update_set_temp )
 
    	# set sizing and position info
-
+		
 		wimg.size = ( 80, 80 )
 		wimg.size_hint = ( None, None )
-		wimg.pos = ( 10, 380 )
+		wimg.pos = ( 10, 390 )
 
 		heatControl.size  = ( 100, 130 )
 		heatControl.pos = ( 680, 280 )
 
-		statusLabel.pos = ( 360, 170 )
+		statusLabel.pos = ( 400, 290 )
 
 		tempSlider.size  = ( 100, 360 )
 		tempSlider.pos = ( 570, 20 )
@@ -903,25 +953,30 @@ class ThermostatApp( App ):
 		holdControl.size  = ( 100, 130 )
 		holdControl.pos = ( 680, 80 )
 
-		setLabel.pos = ( 590, 390 )
+		setLabel.pos = ( 590, 370 )
 
-		currentLabel.pos = ( 390, 290 )
+		currentLabel.pos = ( 400, 400 )
 
-		dateLabel.pos = ( 180, 370 )
-		timeLabel.pos = ( 335, 380 )
-
+		dateLabel.pos = ( 180, 400 )
+		timeLabel.pos = ( 160, 370 )
+		
+		
+		weatherImg.pos = ( 270, 110 )
+		weatherSummaryLabel.pos = ( 420, 105 )
+		weatherDetailsLabel.pos = ( 400, 10 )
+		
 		versionLabel.pos = ( 710, 0 )
-
+		
 		forecastTodayHeading = Label( text="[b]Oggi[/b]:", font_size='20sp', markup=True, size_hint = ( None, None ), pos = ( 0, 290 ) )
 		
 		forecastTodayImg.pos = ( 0, 260 )
-		forecastTodaySummaryLabel.pos = ( 100, 260 )
+		forecastTodaySummaryLabel.pos = ( 80, 260 )
 		forecastTodayDetailsLabel.pos = ( 80, 167 )
 
-		forecastTomoHeading = Label( text="[b]Domani[/b]:", font_size='20sp', markup=True, size_hint = ( None, None ), pos = ( 20, 130 ) )
+		forecastTomoHeading = Label( text="[b]Domani[/b]:", font_size='20sp', markup=True, size_hint = ( None, None ), pos = ( 15, 130 ) )
 
 		forecastTomoImg.pos = ( 0, 100 )
-		forecastTomoSummaryLabel.pos = ( 100, 100 )
+		forecastTomoSummaryLabel.pos = ( 80, 100 )
 		forecastTomoDetailsLabel.pos = ( 80, 7 )
 
 		# Add the UI elements to the thermostat UI layout:
@@ -934,6 +989,9 @@ class ThermostatApp( App ):
 		thermostatUI.add_widget( statusLabel )
 		thermostatUI.add_widget( dateLabel )
 		thermostatUI.add_widget( timeLabel )
+		thermostatUI.add_widget( weatherImg )
+		thermostatUI.add_widget( weatherSummaryLabel )
+		thermostatUI.add_widget( weatherDetailsLabel )
 		thermostatUI.add_widget( versionLabel )
 		thermostatUI.add_widget( forecastTodayHeading )
 		thermostatUI.add_widget( forecastTodayImg )
@@ -967,14 +1025,15 @@ class ThermostatApp( App ):
 			minUI.add_widget( altStatusLabel )
 			minScreen.add_widget( minUI )
 
-			screenMgr = ScreenManager( transition=NoTransition() )		# FadeTransition seems to have OpenGL bugs in Kivy Dev 1.9.1 and is unstable, so sticking with no transition for now
+			screenMgr = ScreenManager( transition=FallOutTransition(duration=.5) )		# FadeTransition seems to have OpenGL bugs in Kivy Dev 1.9.1 and is unstable, so sticking with no transition for now
 			screenMgr.add_widget ( uiScreen )
 			screenMgr.add_widget ( minScreen )
 
 			layout = screenMgr
 
 			minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout )
-
+			lighOffTimer = Clock.schedule_once( light_off, lightOff )
+			
 			if pirEnabled:
 				Clock.schedule_interval( check_pir, pirCheckInterval )
 
@@ -984,7 +1043,7 @@ class ThermostatApp( App ):
 
 		# Show the current weather & forecast
 		Clock.schedule_once( display_forecast_weather, 10 )
-
+		Clock.schedule_once( display_current_weather, 5 )
 		return layout
 
 
@@ -1077,7 +1136,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('user', 'user1') and password == 'pass':
+    if username in (settings.get( "thermostat" )[ "user" ]) and password == settings.get( "thermostat" )[ "pass" ]:
         return None
     else:
         return u"Incorrect username or password."

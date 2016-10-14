@@ -148,25 +148,16 @@ To access the Web-based interface to control the thermostat and change the sched
 
 
 ##Security/Authentication:
-There is a security access and the user and pass are actualy on the code :
+On thermostat_setting.json
+change user and pass as you like
+default:
+user : termo
+pass : pass
 
-#################################
-SESSION_KEY = '_cp_username'
+## Turn Off screen
+I have modified my 5 screen to switch on and off screen 
+with a ssr and so i switch off the screen via software with delay set on lightOff in thermostat_setting.json
 
-def check_credentials(username, password):
-
-    """Verifies credentials for username and password.
-
-    Returns None on success or a string describing the error on failure"""
-
-    # Adapt to your needs
-
-    if username in ('user', 'user1') and password == 'pass':
-        return None
-################################
-So in this case user : user or user1 and password: pass
-
-Change as you like
 
 ##Minimal UI (screensaver) mode: 
 

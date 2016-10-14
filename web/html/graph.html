@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ThermoGraph</title>
+  <meta name="GENERATOR" content="mcedit">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="Keywords" content="termoregolatore, thermo, temperatura, python">
+  <meta name="Author" content="Jpnos">
+  <meta http-equiv="refresh" content="300">
+
+<script type="text/javascript"
+  src="/javascript/dygraph-combined.js"></script>
+</head>
+
+
+<body>
+<title>Temperature Graphic</title>
+
+<div id="graphdiv" style="width:600px; height:350px; margin: 0 auto"></div>
+<script type="text/javascript">
+  g = new Dygraph(
+
+    // containing div
+    document.getElementById("graphdiv"),
+    "/graph/thermostat.csv",
+    {
+    //showRoller: false,
+    title: 'Grafico temperature',
+    ylabel: 'Temperature (C)',
+    xlabel: 'Time',
+    legend: 'always',
+    yRangePad: '50',
+    xRangePad: '30',
+    labelDivStyles: {'textalign':'right'}
+    }
+  );
+</script>
+<div id="testo" style="width:450px; height:100px; margin: 0 auto">
+<p>
+switch varia da 10 = off a 12 = on<br><br>
+Chart interattiva.<br>
+Muovi il mouse per evidenziare i singoli valori.<br>
+Clicca e trascina per selezionare ed effettuare uno zoom sull'area selezionata.<br>
+Doppio click del mouse per ritornare alla visualizzazione globale.<br>
+Con il tasto "Shift" premuto, usa il click del mouse per trascinare l'area di visualizzazione.<br></br>
+ <a href='/'>Thermostat Web Interface page</a
+</p>
+</div>
+</body>
+</html>
