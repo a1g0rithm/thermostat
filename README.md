@@ -26,6 +26,7 @@ Key features include:
 	9. Minimal UI (screensaver) mode
 	10. Detailed logging with selectable levels, including graph of data
 	11. Security Access to web interface
+	12. Inteface for Oregon Scientific EMR211 to control and correct temperature
 
 ###Thermostat User Interface
 
@@ -75,7 +76,8 @@ The author's final internals, before the case top was installed.
 	- WINOMO DS18B20 Weatherproof temperature sensor
 	- Makibes 5 Inch HDMI Touchscreen Display
 	- Custom 3d abs printed thermostat enclosure
-
+	- EMR211 Oregon Scientific
+	- Bluetooth compatible adapter
 
 ##Software Requirements (as used/tested by author):
 
@@ -87,6 +89,8 @@ The author's final internals, before the case top was installed.
 	    - FakeGPIO (for testing on non-Pi platforms, customized version included)
 	    - CherryPy (web server)
 	    - schedule (for scheduled events)
+		- bluepy
+		- subprocess32
 	    - openweathermap.org app key 
 		
 
@@ -94,7 +98,7 @@ The author's final internals, before the case top was installed.
 
 	1. Make sure you have the latest Raspbian updates
 	2. Install Kivy on your Pi using the instructions found here: http://www.kivy.org/docs/installation/installation-rpi.html
-	3. Install additional python packages: CherryPy, schedule & w1thermsensor using the command "sudo pip install ..."
+	3. Install additional python packages: CherryPy, schedule,bluepy,subprocess32 & w1thermsensor using the command "sudo pip install ..."
 	4. Get an openweathermap.org app key if you don't have one from here: http://www.openweathermap.org/appid
 	5. Edit the thermostat_settings.json file and insert your Open Weather Map app key in the appropriate spot. Also change the location to your location.
 

@@ -12,31 +12,33 @@
 <script type="text/javascript"
   src="/javascript/dygraph-combined.js"></script>
 </head>
-
-
 <body>
 <title>Temperature Graphic</title>
+<table align = center>
+<td valign=top><div id="graphdiv" style="width:500px; height:350px;background-color:#eee; padding:0,1em 0.1em 0em 0.1em; border: 1px solid black; margin: 0 auto; align:center"></div></td>
 
-<div id="graphdiv" style="width:600px; height:350px; margin: 0 auto"></div>
+<td valign=top><div id="labels" style="width:100px; height:100px;background-color:#eee; padding:0,1em 0.1em 0em 0.1em; border: 1px solid black; font-size=10pt; margin: 0 auto; align:center"></div></td>
 <script type="text/javascript">
-  g = new Dygraph(
-
-    // containing div
-    document.getElementById("graphdiv"),
+  g = new Dygraph(document.getElementById("graphdiv"),
     "/graph/thermostat.csv",
     {
     //showRoller: false,
     title: 'Grafico temperature',
     ylabel: 'Temperature (C)',
     xlabel: 'Time',
+    labels:["Date","set","letta","switch"],
+    labelsSeparateLines: true,
     legend: 'always',
     yRangePad: '50',
     xRangePad: '30',
-    labelDivStyles: {'textalign':'right'}
+    colors: ['#284785', '#FF1111','#000000' ],
+    labelsDiv: document.getElementById("labels")
     }
+    
   );
 </script>
-<div id="testo" style="width:450px; height:100px; margin: 0 auto">
+<tr>
+<td valign=top align=center><div id="testo" style="width:450px; height:100px; margin: 0 auto; font-size:10px; text-align: left">
 <p>
 switch varia da 10 = off a 12 = on<br><br>
 Chart interattiva.<br>
@@ -44,8 +46,14 @@ Muovi il mouse per evidenziare i singoli valori.<br>
 Clicca e trascina per selezionare ed effettuare uno zoom sull'area selezionata.<br>
 Doppio click del mouse per ritornare alla visualizzazione globale.<br>
 Con il tasto "Shift" premuto, usa il click del mouse per trascinare l'area di visualizzazione.<br></br>
- <a href='/'>Thermostat Web Interface page</a
 </p>
-</div>
+</div></td>
+</tr><tr>
+<td valign=top align=center><div id="testo" style="width:450px; height:100px; margin: 0 auto; font-size:14px; align: center">
+<form action="/">
+    <input type="submit" value="Thermostat Home " />
+</form>
+</td></tr>
+</table>
 </body>
 </html>

@@ -8,12 +8,13 @@
         "channel": "file",
         "level": "error"
     },
-    "mqtt": {
-        "clientID": "thermostat",
+    "ble": {
+        "clientID": "IDTW211R",
         "enabled": 0,
-        "port": 1883,
-        "pubPrefix": "mymqtt",
-        "server": "localhost"
+	"mac": "",
+	"correct_enabled" : 0,
+	"timeout" : 300,
+	"timeout_correct" : 60
     },
     "pir": {
         "pirCheckInterval": 0.5,

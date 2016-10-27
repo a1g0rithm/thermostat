@@ -28,7 +28,6 @@
 #       Core Imports                                                         #
 #                                                                            #
 ##############################################################################
-
 import threading
 import math
 import os, os.path, sys
@@ -39,7 +38,7 @@ import json
 import random
 import socket
 import re
-import subprocess
+import subprocess32
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
@@ -62,7 +61,7 @@ from kivy.uix.slider import Slider
 from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle
 from kivy.storage.jsonstore import JsonStore
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition,FallOutTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 
 
 ##############################################################################
@@ -74,7 +73,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition,FallOutTr
 import cherrypy
 import schedule
 import struct
-
+from bluepy.btle import *
 
 ##############################################################################
 #                                                                            #
@@ -186,7 +185,7 @@ MSG_SUBTYPE_TEXT			= "text"
 #                                                                            #
 ##############################################################################
 
-THERMOSTAT_VERSION = "2.0.5"
+THERMOSTAT_VERSION = "2.1.0"
 
 # Debug settings
 
@@ -298,14 +297,21 @@ priorCorrected		= -100.0
 setTemp			= 22.0 if not( state.exists( "state" ) ) else state.get( "state" )[ "setTemp" ]
 setice			= 15.0 if not(settings.exists ( "thermostat")) else settings.get("thermostat")["tempice"]
 tempHysteresis		= 0.5  if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "tempHysteresis" ]
-
+temp_ble_correct	= 0
 tempCheckInterval	= 3    if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "tempCheckInterval" ]
 
 minUIEnabled		= 0    if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "minUIEnabled" ]
 minUITimeout		= 3    if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "minUITimeout" ]
 lightOff		= 10   if not( settings.exists( "thermostat" ) ) else settings.get( "thermostat" )[ "lightOff" ]
+
 minUITimer		= None
 lightOffTimer		= None
+bleTimer		= None
+
+bleTimeout		= 60 if not( settings.exists("thermostat")) else settings.get( "ble")["timeout"]
+bleTimeout_correct	= 10 if not( settings.exists("thermostat")) else settings.get( "ble")["timeout_correct"]
+bleEnabled 		= 0 if not( settings.exists( "thermostat" ) ) else settings.get( "ble" )[ "enabled" ]
+bleCorrectEnabled 	= 0 if not( settings.exists( "thermostat" ) ) else settings.get( "ble" )[ "correct_enabled" ]
 
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/tempScale", str( tempScale ), timestamp=False )
 log( LOG_LEVEL_INFO, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/settings/temperature/scaleUnits", str( scaleUnits ), timestamp=False )
@@ -427,8 +433,6 @@ def setControlState( control, state ):
 		controlLabel = control.text.replace( "[b]", "" ).replace( "[/b]", "" ).lower()
 		log( LOG_LEVEL_STATE, controlLabel +  CHILD_DEVICE_SUFFIX_UICONTROL, MSG_SUBTYPE_BINARY_STATUS, "0" if state == "normal" else "1" )
 
-
-
 heatControl = ToggleButton( text="[b]Heat[/b]", 
 				markup=True, 
 				size_hint = ( None, None )
@@ -467,8 +471,8 @@ def get_status_string():
 		else:
 		    sched = "No Ice" 
 		    temperature = settings.get("thermostat")["tempice"]
-		
-		testHeat = False
+		    testHeat = False
+		    
 		if GPIO.input( heatPin ) == True:
 			testHeat = False
 		else:
@@ -501,6 +505,9 @@ tempSlider 	 = Slider( orientation='vertical', min=minTemp, max=maxTemp, step=te
 
 screenMgr    = None
 
+ble_in =  Label( text="Init", size_hint = ( None, None ),  font_size='16sp', markup=True, text_size=( 300, 150 ), valign="top", color=(0.5,0.5,0.5,0.2))
+ble_out =  Label( text="Init", size_hint = ( None, None ),  font_size='16sp', markup=True, text_size=( 300, 150 ), valign="top", color=(0.5,0.5,0.5,0.2))
+
 ##############################################################################
 #                                                                            #
 #       Weather functions/constants/widgets                                  #
@@ -521,6 +528,11 @@ weatherRefreshInterval   = settings.get( "weather" )[ "weatherRefreshInterval" ]
 weatherSummaryLabel  = Label( text="", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 200, 20 ) )
 weatherDetailsLabel  = Label( text="", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 300, 150 ), valign="top" )
 weatherImg           = Image( source="web/images/na.png", size_hint = ( None, None ) )
+weatherminSummaryLabel  = Label( text="", size_hint = ( None, None ), font_size='20sp', markup=True, text_size=( 200, 20 ), color=(0.5,0.5,0.5,0.2) )
+weatherminImg           = Image( source="web/images/na.png", size_hint = ( None, None ), color=(1,1,1,0.4) )
+
+bluetoothImg           = Image( source="web/images/bluetooth.png", size_hint = ( None, None ),color=(1,1,1,0) )
+bluetoothMinImg           = Image( source="web/images/bluetooth.png", size_hint = ( None, None ), color=(1,1,1,0) )
 
 forecastTodaySummaryLabel = Label( text="", size_hint = ( None, None ), font_size='15sp',  markup=True, text_size=( 100, 15 ) )
 forecastTodayDetailsLabel = Label( text="", size_hint = ( None, None ), font_size='15sp',  markup=True, text_size=( 200, 150 ), valign="top" )
@@ -542,14 +554,21 @@ def get_cardinal_direction( heading ):
 	
 def display_current_weather( dt ):
 	with weatherLock:
+		global ble_out
 		interval = weatherRefreshInterval
 		try:
 			weather = get_weather( weatherURLCurrent )
-			print weather
 			weatherImg.source = "web/images/" + weather[ "weather" ][ 0 ][ "icon" ] + ".png" 
 			weatherSummaryLabel.text = "[b]" + weather[ "weather" ][ 0 ][ "description" ].title() + "[/b]"
+			weatherminImg.source = "web/images/" + weather[ "weather" ][ 0 ][ "icon" ] + ".png" 
+			weatherminSummaryLabel.text = "[b]" + weather[ "weather" ][ 0 ][ "description" ].title() + "[/b]"
+			if bleEnabled and ble_in.text != "None":
+					temp_vis=ble_out.text
+			else:
+				temp_vis=str( int( round( weather[ "main" ][ "temp" ], 0 ) ) )
+				
 			weatherDetailsLabel.text = "\n".join( (
-				"Temp:       " + str( int( round( weather[ "main" ][ "temp" ], 0 ) ) ) + scaleUnits,
+				"Temp:       " + temp_vis + scaleUnits,
 				"Umidita:   " + str( weather[ "main" ][ "humidity" ] ) + "%",
 				"Vento:       " + str( int( round( weather[ "wind" ][ "speed" ] * windFactor ) ) ) + windUnits + " " + get_cardinal_direction( weather[ "wind" ][ "deg" ] ),
 				"Nuvole:     " + str( weather[ "clouds" ][ "all" ] ) + "%",
@@ -573,10 +592,8 @@ def display_forecast_weather( dt ):
 		interval = forecastRefreshInterval
 		try:
 			forecast = get_weather( weatherURLForecast )
-			print forecast
 			today    = forecast[ "list" ][ 0 ]
 			tomo     = forecast[ "list" ][ 1 ]
-			
 			forecastTodayImg.source = "web/images/" + today[ "weather" ][ 0 ][ "icon" ] + ".png" 
 			
 			forecastTodaySummaryLabel.text = "[b]" + today[ "weather" ][ 0 ][ "description" ].title() + "[/b]"		
@@ -693,7 +710,13 @@ def setLogLevel( msg ):
 	else:
 		log( LOG_LEVEL_ERROR, CHILD_DEVICE_NODE, MSG_SUBTYPE_CUSTOM + "/loglevel", "Invalid LogLevel: " + msg.payload ) 
 
-
+def restart_program():
+    """Restarts the current program.
+    Note: this function does not return. Any cleanup action (like
+    saving data) must be done before calling this function."""
+    python = sys.executable
+    os.execl(python, python, * sys.argv)
+    
 ##############################################################################
 #                                                                            #
 #       Thermostat Implementation                                            #
@@ -796,18 +819,23 @@ def check_sensor_temp( dt ):
 	with thermostatLock:
 		global currentTemp, priorCorrected
 		global tempSensor
-		
+		global temp_ble_correct
+		global ble_correct_enabled
 		if tempSensor is not None:
 			rawTemp = tempSensor.get_temperature( sensorUnits )
 			correctedTemp = ( ( ( rawTemp - freezingMeasured ) * referenceRange ) / measuredRange ) + freezingPoint
 			currentTemp = round( correctedTemp, 1 )
 			log( LOG_LEVEL_DEBUG, CHILD_DEVICE_TEMP, MSG_SUBTYPE_CUSTOM + "/raw", str( rawTemp ) )
 			log( LOG_LEVEL_DEBUG, CHILD_DEVICE_TEMP, MSG_SUBTYPE_CUSTOM + "/corrected", str( correctedTemp ) )
-
+			
 			if abs( priorCorrected - correctedTemp ) >= TEMP_TOLERANCE:
 				log( LOG_LEVEL_STATE, CHILD_DEVICE_TEMP, MSG_SUBTYPE_TEMPERATURE, str( currentTemp ) )	
 				priorCorrected = correctedTemp	
 
+		if bleEnabled and temp_ble_correct !=0 and bleCorrectEnabled:
+				rawTemp = tempSensor.get_temperature( sensorUnits )
+				corrected_temp = (rawTemp+temp_ble_correct)/2
+				currentTemp = round( corrected_temp, 1 )
 		currentLabel.text = "[b]" + str( currentTemp ) + scaleUnits + "[/b]"
 		altCurLabel.text  = currentLabel.text
 
@@ -865,7 +893,69 @@ def check_pir( pin ):
 		else:
 			log( LOG_LEVEL_DEBUG, CHILD_DEVICE_PIR, MSG_SUBTYPE_TRIPPED, "0" )
 
+# connect with oregon scientific and check inside outside temperature
+def ble_Check(dt):
+	global ble_in
+	if bleEnabled and ble_in.text != "None" :
+		global bleTimer
+		global setTemp
+		global currentTemp
+		global ble_out
+		global temp_ble_correct
+		global bluetoothImg
+		global bluetoothMinImg
+		with thermostatLock:
+			print setTemp,currentTemp
+			ble_in.text="None"
+			ble_out.text="None"
+			temp_ble_correct=0
+			try:
+				cmd = 'python blescan.py ' + settings.get( "ble" )[ "mac" ]
+				p = subprocess32.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+				out, err = p.communicate(timeout=5) 
+				result = out.split('\n')
+				Clock.unschedule(bleTimer)
+				if result[0] ==  "WeatherStation connected !":	
+					try :
+						line = result[1].translate(None, "()'")
+						inTemperature= line.split(',')
+						line = result[2].translate(None, "()'")
+						outTemperature= line.split(',')
+						in_temp = float(inTemperature[1])
+						out_temp = float(outTemperature[1])
+						if setTemp >= currentTemp +1 and GPIO.input( heatPin ) == False:
+							bleTimer = Clock.schedule_once( ble_Check, bleTimeout_correct)
+							bluetoothImg.color = (1,0,0,1)
+							bluetoothMinImg.color = (1,0,0,0.4)
+						else:
+							bleTimer = Clock.schedule_once( ble_Check, bleTimeout)
+							bluetoothImg.color = (1,1,1,1)
+							bluetoothMinImg.color = (1,1,1,0.4)
+						temp_ble_correct = in_temp
+						ble_in.text = "\n".join( (
+							"Temp in            : " +str(float(inTemperature[1])),
+							"Temp in max   : " +str(float(inTemperature[2])),
+							"Temp in min    : " +str(float(inTemperature[3])),
+							"Temp out          : " +str(float(outTemperature[1])),
+							"Temp out max : " +str(float(outTemperature[2])),
+							"Temp out min  : " +str(float(outTemperature[3]))
+							))
+						ble_out.text = " ".join( (
+							str(float(outTemperature[1])),
+							))
+						
+					except:
+						bluetoothImg.color = (1,1,1,0)
+						bluetoothMinImg.color = (1,1,1,0)
+						
 
+						
+			except:
+				bluetoothImg.color = (1,1,1,0)
+				bluetoothMinImg.color = (1,1,1,0)
+				
+				
+			
 # Minimal UI Display functions and classes
 #shell.shell(has_input=False, record_output=True, record_errors=True, strip_empty=True)
 
@@ -876,7 +966,6 @@ def show_minimal_ui( dt ):
 
 def light_off( dt ):
 	with thermostatLock:
-		print "screen off",lightOff
 		GPIO.output( lightPin, GPIO.HIGH )
 		log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Screen Off" )
 		
@@ -892,14 +981,12 @@ class MinimalScreen( Screen ):
 		if touch.grab_current is self:
 			touch.ungrab( self )
 			with thermostatLock:
-				print minUITimer,lightOffTimer
 				Clock.unschedule( light_off )
 				if minUITimer != None:
 					Clock.unschedule( show_minimal_ui )	
 				minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout )
 				lighOffTimer = Clock.schedule_once( light_off, lightOff )
 				GPIO.output( lightPin, GPIO.LOW )
-				print "screen on"
 				self.manager.current = "thermostatUI"
 				log( LOG_LEVEL_DEBUG, CHILD_DEVICE_SCREEN, MSG_SUBTYPE_TEXT, "Full" )
 			return True
@@ -954,6 +1041,8 @@ class ThermostatApp( App ):
 		holdControl.pos = ( 680, 80 )
 
 		setLabel.pos = ( 590, 370 )
+		
+		bluetoothImg.pos = (730,0)
 
 		currentLabel.pos = ( 400, 400 )
 
@@ -1001,7 +1090,7 @@ class ThermostatApp( App ):
 		thermostatUI.add_widget( forecastTomoImg )
 		thermostatUI.add_widget( forecastTomoDetailsLabel )
 		thermostatUI.add_widget( forecastTomoSummaryLabel )
-
+		thermostatUI.add_widget( bluetoothImg )
 		layout = thermostatUI
 
 		# Minimap UI initialization
@@ -1012,38 +1101,53 @@ class ThermostatApp( App ):
 
 			minScreen 	= MinimalScreen( name="minimalUI" )
 			minUI 		= FloatLayout( size=( 800, 480 ) )
+			
 
 			with minUI.canvas.before:
 				Color( 0.0, 0.0, 0.0, 1 )
 				self.rect = Rectangle( size=( 800, 480 ), pos=minUI.pos )
 
-			altCurLabel.pos = ( 390, 290 )
-			altTimeLabel.pos = ( 335, 380 )
-			altStatusLabel.pos = (360 , 170 )
+			if bleEnabled and ble_in.text != "None":
+				ble_in.pos = (600,100)
+				minUI.add_widget( ble_in )
+				weatherminImg.pos = ( 450, 200 )
+				weatherminSummaryLabel.pos = ( 590, 200 )
+				minUI.add_widget(weatherminImg)
+				minUI.add_widget(weatherminSummaryLabel)
+				altCurLabel.pos = ( 190, 290 )
+				altTimeLabel.pos = ( 170, 360 )
+				altStatusLabel.pos = (160 , 170 )
+				bluetoothMinImg.pos =(	210,340)
+				minUI.add_widget(bluetoothMinImg)
+			else:
+				altCurLabel.pos = ( 390, 290 )
+				altTimeLabel.pos = ( 335, 380 )
+				altStatusLabel.pos = (360 , 170 )
+				
 			minUI.add_widget( altCurLabel )
 			minUI.add_widget( altTimeLabel )
 			minUI.add_widget( altStatusLabel )
 			minScreen.add_widget( minUI )
 
-			screenMgr = ScreenManager( transition=FallOutTransition(duration=.5) )		# FadeTransition seems to have OpenGL bugs in Kivy Dev 1.9.1 and is unstable, so sticking with no transition for now
+			screenMgr = ScreenManager( transition=NoTransition())		# FadeTransition seems to have OpenGL bugs in Kivy Dev 1.9.1 and is unstable, so sticking with no transition for now
 			screenMgr.add_widget ( uiScreen )
 			screenMgr.add_widget ( minScreen )
 
 			layout = screenMgr
-
 			minUITimer = Clock.schedule_once( show_minimal_ui, minUITimeout )
 			lighOffTimer = Clock.schedule_once( light_off, lightOff )
-			
 			if pirEnabled:
 				Clock.schedule_interval( check_pir, pirCheckInterval )
-
+			if bleEnabled:
+				bleTimer = Clock.schedule_once( ble_Check, 4)
 
 		# Start checking the temperature
 		Clock.schedule_interval( check_sensor_temp, tempCheckInterval )
 
 		# Show the current weather & forecast
-		Clock.schedule_once( display_forecast_weather, 10 )
-		Clock.schedule_once( display_current_weather, 5 )
+		
+		Clock.schedule_once( display_forecast_weather, 12 )
+		Clock.schedule_once( display_current_weather, 10 )
 		return layout
 
 
